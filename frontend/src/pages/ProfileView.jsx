@@ -195,7 +195,7 @@ export default function ProfileView() {
               <div className="glass rounded-2xl p-5 border border-rose-500/20" data-testid="profile-view-intimate">
                 <h3 className="font-serif-luxe text-xl mb-2">{t("intimate", lang)}</h3>
                 <Row label={t("bust_size", lang)} value={p.bust_size} testid="pv-bust" />
-                <Row label={t("penis_size", lang)} value={optLabel("penis_size", p.penis_size, lang)} testid="pv-penis" />
+                <Row label={t("penis_size", lang)} value={p.penis_size} testid="pv-penis" />
               </div>
             )}
           </div>
