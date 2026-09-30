@@ -8,10 +8,12 @@ import { toast } from "sonner";
 import { api } from "../lib/api";
 import { useApp } from "../context/AppContext";
 import { t } from "../lib/i18n";
+import { presence } from "../lib/presence";
 
 export default function VideoCallModal({ open, onOpenChange, target }) {
   const { user, meta, lang, refreshUser } = useApp();
   const rate = Math.max(target?.video_rate || 0, meta?.video_rate || 10);
+  const online = presence(target, lang).online;
   const [minutes, setMinutes] = useState(5);
   const [phase, setPhase] = useState("setup"); // setup | connecting | in_call | ended
   const [elapsed, setElapsed] = useState(0);
@@ -24,6 +26,7 @@ export default function VideoCallModal({ open, onOpenChange, target }) {
   }, [open]);
 
   const start = async () => {
+    if (!online) { toast.error(t("video_calls_offline_toast", lang)); return; }
     const cost = minutes * rate;
     if (user.coins < cost) { toast.error(t("not_enough_coins", lang)); return; }
     setPhase("connecting");
@@ -39,7 +42,9 @@ export default function VideoCallModal({ open, onOpenChange, target }) {
       }, 1200);
     } catch (e) {
       const detail = e.response?.data?.detail;
-      const msg = detail === "VIDEO_CALLS_DISABLED" ? t("video_calls_disabled_toast", lang) : (detail || t("failed", lang));
+      const msg = detail === "VIDEO_CALLS_DISABLED" ? t("video_calls_disabled_toast", lang)
+        : detail === "USER_OFFLINE" ? t("video_calls_offline_toast", lang)
+        : (detail || t("failed", lang));
       toast.error(msg); setPhase("setup");
     }
   };
@@ -62,7 +67,8 @@ export default function VideoCallModal({ open, onOpenChange, target }) {
               <div className="flex justify-between mt-1"><span className="text-slate-400">{t("cost", lang)}</span><span className="font-mono-num text-amber-300">🪙 {cost}</span></div>
               <div className="flex justify-between mt-1"><span className="text-slate-400">{t("balance", lang)}</span><span className="font-mono-num">🪙 {user?.coins}</span></div>
             </div>
-            <Button data-testid="videocall-start-button" onClick={start} className="rose-btn text-white border-0 w-full h-11">{t("start_call", lang)}</Button>
+            <Button data-testid="videocall-start-button" onClick={start} disabled={!online} className="rose-btn text-white border-0 w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed">{t("start_call", lang)}</Button>
+            {!online && <p data-testid="videocall-offline-note" className="text-xs text-amber-300/90 text-center">{t("video_calls_offline_toast", lang)}</p>}
           </div>
         )}
         {(phase === "connecting" || phase === "in_call") && (

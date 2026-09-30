@@ -1921,6 +1921,10 @@ async def start_call(req: VideoCallReq, user=Depends(get_current_user)):
     target = await db.users.find_one({"id": req.target_id})
     if not target: raise HTTPException(404, "Recipient not found")
     if target.get("video_calls_enabled") is False: raise HTTPException(403, "VIDEO_CALLS_DISABLED")
+    # Video calls are only allowed when the recipient is currently online (seen within the last 5 minutes)
+    _ls = target.get("last_seen")
+    _online = bool(_ls and _ls > (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat())
+    if not _online: raise HTTPException(403, "USER_OFFLINE")
     rate = max(target.get("video_rate") or 0, (await get_settings())["video_rate"])
     cost = req.minutes * rate
     if (user.get("coins", 0) + user.get("withdrawable", 0)) < cost: raise HTTPException(400, "Insufficient coins")

@@ -14,7 +14,8 @@ import SpinWheel from "../components/SpinWheel";
 import CountrySelect from "../components/CountrySelect";
 import CitySelect from "../components/CitySelect";
 import MultiSelect from "../components/MultiSelect";
-import { Eye, EyeOff, MapPin, Loader2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "../components/ui/dropdown-menu";
+import { Eye, EyeOff, MapPin, Loader2, ChevronDown } from "lucide-react";
 import { detectLocation } from "../lib/geolocate";
 import { normalizeCountry } from "../lib/countries";
 import { matchCuratedCity } from "../lib/cities";
@@ -207,14 +208,44 @@ export default function Auth() {
                 <div className="col-span-2">
                   <Label className="text-xs text-slate-400">{t("orientation", lang)} ({t("select_multiple", lang)}) <span className="text-rose-400">*</span></Label>
                   <div className="mt-1">
-                    <MultiSelect
-                      testid="auth-orientation-select"
-                      accent="rose"
-                      placeholder={t("orientation", lang)}
-                      value={f.orientations || []}
-                      onChange={(os) => setF({ ...f, orientations: os, orientation: os[0] || "" })}
-                      options={ORIENTATIONS.map(o => ({ value: o, label: optLabel("orientation", o, lang) }))}
-                    />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          data-testid="auth-orientation-select"
+                          className="w-full min-h-10 flex items-center justify-between gap-2 rounded-md bg-white/5 border border-white/10 px-3 py-2 text-sm hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+                        >
+                          <span className={`truncate text-left ${(f.orientations && f.orientations.length) ? "text-white" : "text-slate-400"}`}>
+                            {(f.orientations && f.orientations.length)
+                              ? f.orientations.map(o => optLabel("orientation", o, lang)).join(", ")
+                              : t("orientation", lang)}
+                          </span>
+                          <ChevronDown size={15} className="shrink-0 opacity-50" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="bg-[#161320] border-white/10 text-white max-h-64 overflow-y-auto w-[--radix-dropdown-menu-trigger-width] min-w-[240px]">
+                        {ORIENTATIONS.map(o => {
+                          const checked = (f.orientations || []).includes(o);
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={o}
+                              data-testid={`auth-orientation-option-${o}`}
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                const next = v
+                                  ? [...(f.orientations || []), o]
+                                  : (f.orientations || []).filter(x => x !== o);
+                                setF({ ...f, orientations: next, orientation: next[0] || "" });
+                              }}
+                              onSelect={(e) => e.preventDefault()}
+                              className="text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                            >
+                              {optLabel("orientation", o, lang)}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </div>
