@@ -2667,7 +2667,7 @@ async def get_vip_profile(uid: str, preview: Optional[str] = None, user=Depends(
 @api.post("/vip/unlock/{uid}")
 async def vip_unlock(uid: str, user=Depends(get_current_user)):
     """One-time unlock of a single member's private VIP section for VIP_UNLOCK_COINS coins.
-    The owner earns the coins (credited to withdrawable). Premium/VIP members never need this."""
+    The owner earns 50% (credited to withdrawable); the platform keeps the other 50%. Premium/VIP members never need this."""
     owner = await db.users.find_one({"id": uid})
     if not owner:
         owner = await db.users.find_one({"vip.public_id": uid})
@@ -2689,14 +2689,17 @@ async def vip_unlock(uid: str, user=Depends(get_current_user)):
         raise HTTPException(400, "Insufficient coins")
     await spend_coins(user["id"], price)
     await record_txn(user["id"], "vip_unlock", -price, description="Unlocked a private VIP section")
-    # Credit the owner for their private content
-    await db.users.update_one({"id": owner["id"]}, {"$inc": {"withdrawable": price}})
-    await record_txn(owner["id"], "vip_unlock_earned", price, description="A member unlocked your private VIP section")
+    # 50/50 split: half the coins go to the owner (withdrawable), half is kept by the platform
+    owner_share = price // 2
+    platform_share = price - owner_share
+    await db.users.update_one({"id": owner["id"]}, {"$inc": {"withdrawable": owner_share}})
+    await record_txn(owner["id"], "vip_unlock_earned", owner_share, description="A member unlocked your private VIP section (50% share)")
     await db.vip_unlocks.insert_one({"id": str(uuid.uuid4()), "viewer_id": user["id"], "owner_id": owner["id"],
-                                     "coins": price, "created_at": datetime.now(timezone.utc).isoformat()})
+                                     "coins": price, "owner_share": owner_share, "platform_share": platform_share,
+                                     "created_at": datetime.now(timezone.utc).isoformat()})
     await notify(owner["id"], "vip_unlock", "🔓 VIP content unlocked",
-                 f"A member unlocked your private VIP section · 🪙 {price}.", {}, email=False)
-    return {"unlocked": True, "coins_spent": price}
+                 f"A member unlocked your private VIP section · you earned 🪙 {owner_share} (50%).", {}, email=False)
+    return {"unlocked": True, "coins_spent": price, "owner_share": owner_share, "platform_share": platform_share}
 
 @api.post("/vip/book")
 async def vip_book(req: DateBookingReq, user=Depends(get_current_user)):

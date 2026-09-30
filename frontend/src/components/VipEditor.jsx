@@ -231,6 +231,12 @@ export default function VipEditor() {
             ))}
           </div>
           <p className="text-[11px] text-slate-500 mt-1">{t("vip_post_mode_note", lang)}</p>
+          {postMode === "together" && (
+            <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-[11px] text-amber-200/90" data-testid="vip-unlock-split-note">
+              <Lock size={13} className="mt-0.5 shrink-0 text-amber-300" />
+              <span>{t("vip_unlock_split_note", lang)}</span>
+            </div>
+          )}
         </div>
       </div>
 
