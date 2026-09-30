@@ -62,8 +62,7 @@ export default function VipSection({ userId, name, preview }) {
         )}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-center px-6">
           <Lock className="text-amber-300" size={26} />
-          <div className="font-serif-luxe text-lg text-white mt-2">{t("vip_sensitive", lang)}</div>
-          {data.services_count > 0 && <div className="text-xs text-amber-200 mt-1">{data.services_count} 🔒</div>}
+          <div className="font-serif-luxe text-lg text-white mt-2">{t("vip_sensitive", lang)} 🔒</div>
           <p className="text-xs text-slate-300 mt-1 max-w-xs">{t("vip_unlock_note", lang)}</p>
           <div className="flex flex-row items-stretch gap-2 mt-3 w-full max-w-sm">
             <Button data-testid="vip-buy-vip-cta" onClick={() => nav("/wallet?premium=1")} className="rose-btn text-white border-0 flex-1">
