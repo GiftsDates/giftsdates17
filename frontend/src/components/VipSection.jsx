@@ -65,18 +65,14 @@ export default function VipSection({ userId, name, preview }) {
           <div className="font-serif-luxe text-lg text-white mt-2">{t("vip_sensitive", lang)}</div>
           {data.services_count > 0 && <div className="text-xs text-amber-200 mt-1">{data.services_count} 🔒</div>}
           <p className="text-xs text-slate-300 mt-1 max-w-xs">{t("vip_unlock_note", lang)}</p>
-          {data.can_unlock ? (
-            <div className="flex flex-row items-stretch gap-2 mt-3 w-full max-w-sm">
-              <Button data-testid="vip-buy-vip-cta" onClick={() => nav("/wallet?premium=1")} className="rose-btn text-white border-0 flex-1">
-                <Crown size={16} className="me-2" /> {t("vip_buy_vip", lang)}
-              </Button>
-              <Button data-testid="vip-unlock-one-cta" variant="outline" onClick={unlockSection} disabled={unlocking} className="flex-1 bg-white/5 border-amber-500/40 text-amber-200 hover:bg-amber-500/10 hover:text-amber-100">
-                {t("vip_unlock_coins", lang).replace("{n}", data.unlock_price || 100)} 🪙
-              </Button>
-            </div>
-          ) : (
-            <Button data-testid="vip-unlock-cta" onClick={() => nav("/wallet?premium=1")} className="rose-btn text-white border-0 mt-3">{t("vip_buy_vip", lang)}</Button>
-          )}
+          <div className="flex flex-row items-stretch gap-2 mt-3 w-full max-w-sm">
+            <Button data-testid="vip-buy-vip-cta" onClick={() => nav("/wallet?premium=1")} className="rose-btn text-white border-0 flex-1">
+              <Crown size={16} className="me-2" /> {t("vip_buy_vip", lang)}
+            </Button>
+            <Button data-testid="vip-unlock-one-cta" variant="outline" onClick={unlockSection} disabled={unlocking} className="flex-1 bg-white/5 border-amber-500/40 text-amber-200 hover:bg-amber-500/10 hover:text-amber-100">
+              {t("vip_unlock_coins", lang).replace("{n}", data.unlock_price || 100)} 🪙
+            </Button>
+          </div>
         </div>
       </div>
     );
