@@ -3223,6 +3223,8 @@ async def gift_premium(req: GiftPremiumReq, user=Depends(get_current_user)):
     if not target:
         raise HTTPException(404, "Recipient not found")
     await spend_coins(user["id"], cost)
+    # Gifting premium: the sender spends the coins and the platform keeps 100% of them —
+    # the recipient receives only the premium/VIP time, never any coins.
     if tier == "premium_lite":
         upd = {"premium_lite_until": extend_until(target.get("premium_lite_until"))}
         label = "Premium Lite"
@@ -3232,8 +3234,9 @@ async def gift_premium(req: GiftPremiumReq, user=Depends(get_current_user)):
             upd["vip_until"] = extend_until(target.get("vip_until"))
         label = "VIP Premium" if tier == "vip" else "Premium"
     await db.users.update_one({"id": req.target_id}, {"$set": upd})
+    await record_txn(user["id"], "premium_gift", -cost, description=f"Gifted 30 days of {label} to {target.get('name','a member')}")
     await notify(req.target_id, "premium_gift", f"You received {label}! 👑", f"{user['name']} gifted you 30 days of {label}.", {}, email=True)
-    return {"ok": True, "tier": tier}
+    return {"ok": True, "tier": tier, "coins_spent": cost}
 
 @api.post("/vip/photo")
 async def vip_add_photo(photo: UploadFile = File(...), private: bool = False, user=Depends(get_current_user)):
