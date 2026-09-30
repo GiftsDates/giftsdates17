@@ -2,7 +2,8 @@ import React from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import ChipMultiSelect from "./ChipMultiSelect";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "./ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import MultiSelect from "./MultiSelect";
 import { LANGUAGES, t } from "../lib/i18n";
 import { HOBBY_SELECT_GROUPS, HOBBY_MAX } from "../lib/hobbies";
@@ -56,21 +57,80 @@ export default function ProfileDetailsForm({ f, setF, lang, gender }) {
       <div className="glass rounded-2xl p-6 space-y-4 mb-6" data-testid="profile-details-section">
         <h2 className="font-serif-luxe text-2xl">{t("details", lang)}</h2>
         <Field label={`${t("relationship_intent", lang)} (${t("select_multiple", lang)})`}>
-          <div className="flex flex-wrap gap-2 mt-2" data-testid="profile-intent-chips">
-            {INTENTS.map(o => {
-              const on = intents.includes(o);
-              return <button type="button" key={o} data-testid={`profile-intent-chip-${o}`} onClick={() => toggleIntent(o)} className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${on ? "bg-rose-500/20 border-rose-500/50 text-rose-200" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}>{optLabel("relationship_intent", o, lang)}</button>;
-            })}
+          <div className="mt-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  data-testid="profile-intent-select"
+                  className="w-full min-h-10 flex items-center justify-between gap-2 rounded-md bg-white/5 border border-white/10 px-3 py-2 text-sm hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+                >
+                  <span className={`truncate text-left ${intents.length ? "text-white" : "text-slate-400"}`}>
+                    {intents.length ? intents.map(o => optLabel("relationship_intent", o, lang)).join(", ") : t("relationship_intent", lang)}
+                  </span>
+                  <ChevronDown size={15} className="shrink-0 opacity-50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-[#161320] border-white/10 text-white max-h-64 overflow-y-auto w-[--radix-dropdown-menu-trigger-width] min-w-[240px]">
+                {INTENTS.map(o => (
+                  <DropdownMenuCheckboxItem
+                    key={o}
+                    data-testid={`profile-intent-option-${o}`}
+                    checked={intents.includes(o)}
+                    onCheckedChange={() => toggleIntent(o)}
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                  >
+                    {optLabel("relationship_intent", o, lang)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </Field>
         <Field label={`${t("orientation", lang)} (${t("select_multiple", lang)})`}>
-          <ChipMultiSelect
-            testid="profile-orientation-chips"
-            accent="rose"
-            value={Array.isArray(f.orientations) ? f.orientations : (f.orientation ? [f.orientation] : [])}
-            onChange={(os) => setF({ ...f, orientations: os, orientation: os[0] || "" })}
-            options={ORIENTATIONS.map(o => ({ value: o, label: optLabel("orientation", o, lang) }))}
-          />
+          <div className="mt-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  data-testid="profile-orientation-select"
+                  className="w-full min-h-10 flex items-center justify-between gap-2 rounded-md bg-white/5 border border-white/10 px-3 py-2 text-sm hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+                >
+                  {(() => {
+                    const sel = Array.isArray(f.orientations) ? f.orientations : (f.orientation ? [f.orientation] : []);
+                    return (
+                      <span className={`truncate text-left ${sel.length ? "text-white" : "text-slate-400"}`}>
+                        {sel.length ? sel.map(o => optLabel("orientation", o, lang)).join(", ") : t("orientation", lang)}
+                      </span>
+                    );
+                  })()}
+                  <ChevronDown size={15} className="shrink-0 opacity-50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-[#161320] border-white/10 text-white max-h-64 overflow-y-auto w-[--radix-dropdown-menu-trigger-width] min-w-[240px]">
+                {ORIENTATIONS.map(o => {
+                  const sel = Array.isArray(f.orientations) ? f.orientations : (f.orientation ? [f.orientation] : []);
+                  const checked = sel.includes(o);
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={o}
+                      data-testid={`profile-orientation-option-${o}`}
+                      checked={checked}
+                      onCheckedChange={(v) => {
+                        const next = v ? [...sel, o] : sel.filter(x => x !== o);
+                        setF({ ...f, orientations: next, orientation: next[0] || "" });
+                      }}
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                    >
+                      {optLabel("orientation", o, lang)}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label={t("job_title", lang)}><Input data-testid="profile-job-input" value={f.job_title || ""} onChange={e => set("job_title")(e.target.value)} className="bg-white/5 border-white/10 mt-1" /></Field>
