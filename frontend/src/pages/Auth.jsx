@@ -51,7 +51,7 @@ export default function Auth() {
   const nav = useNavigate();
   const [sp] = useSearchParams();
   const [mode, setMode] = useState(sp.get("register") ? "register" : "login");
-  const [f, setF] = useState({ email: "", password: "", name: "", age: 25, gender: "female", genders: ["female"], interested_in: "male", orientation: "straight", orientations: ["straight"], city: "", country: "", bio: "", phone: "", sms_notifications_enabled: false, referral_code: sp.get("ref") || "", language: lang, birth_day: "", birth_month: "", birth_year: "", lat: null, lng: null });
+  const [f, setF] = useState({ email: "", password: "", name: "", age: 25, gender: "", genders: [], interested_in: "", orientation: "", orientations: [], city: "", country: "", bio: "", phone: "", sms_notifications_enabled: false, referral_code: sp.get("ref") || "", language: lang, birth_day: "", birth_month: "", birth_year: "", lat: null, lng: null });
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -90,7 +90,15 @@ export default function Auth() {
   const submit = async (e) => {
     e.preventDefault();
     if (mode === "register" && !agreed) { toast.error(t("consent_required", lang)); return; }
-    if (mode === "register" && !(f.orientations && f.orientations.length)) { toast.error(t("orientation_required", lang)); return; }
+    if (mode === "register") {
+      if (!f.name || !f.name.trim()) { toast.error(t("fill_all", lang)); return; }
+      if (!(f.birth_day && f.birth_month && f.birth_year)) { toast.error(t("fill_all", lang)); return; }
+      if (!f.gender) { toast.error(t("fill_all", lang)); return; }
+      if (!f.interested_in) { toast.error(t("fill_all", lang)); return; }
+      if (!(f.orientations && f.orientations.length)) { toast.error(t("orientation_required", lang)); return; }
+      if (!f.country) { toast.error(t("fill_all", lang)); return; }
+      if (!f.city) { toast.error(t("fill_all", lang)); return; }
+    }
     setBusy(true);
     try {
       if (mode === "login") { await login(f.email, f.password); toast.success(t("welcome_back", lang)); }
@@ -139,11 +147,11 @@ export default function Auth() {
 
         <form onSubmit={submit} className="space-y-3">
           <div>
-            <Label className="text-xs text-slate-400">{t("email", lang)}</Label>
+            <Label className="text-xs text-slate-400">{t("email", lang)} <span className="text-rose-400">*</span></Label>
             <Input data-testid="auth-email-input" type="email" required value={f.email} onChange={e => setF({ ...f, email: e.target.value })} className="bg-white/5 border-white/10 mt-1" />
           </div>
           <div>
-            <Label className="text-xs text-slate-400">{t("password", lang)}</Label>
+            <Label className="text-xs text-slate-400">{t("password", lang)} <span className="text-rose-400">*</span></Label>
             <div className="relative mt-1">
               <Input data-testid="auth-password-input" type={showPassword ? "text" : "password"} required value={f.password} onChange={e => setF({ ...f, password: e.target.value })} className="bg-white/5 border-white/10 pr-10" />
               <button type="button" data-testid="auth-password-toggle" onClick={() => setShowPassword(s => !s)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-rose-300 transition-colors">
@@ -161,10 +169,10 @@ export default function Auth() {
                   <SelectContent className="bg-[#161320] border-white/10 max-h-72">{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label className="text-xs text-slate-400">{t("name", lang)}</Label>
+              <div><Label className="text-xs text-slate-400">{t("name", lang)} <span className="text-rose-400">*</span></Label>
                 <Input data-testid="auth-name-input" required value={f.name} onChange={e => setF({ ...f, name: e.target.value })} className="bg-white/5 border-white/10 mt-1" /></div>
               <div>
-                <Label className="text-xs text-slate-400">{t("birth_date", lang)}</Label>
+                <Label className="text-xs text-slate-400">{t("birth_date", lang)} <span className="text-rose-400">*</span></Label>
                 <div className="grid grid-cols-3 gap-2 mt-1">
                   <Select value={f.birth_day ? String(f.birth_day) : undefined} onValueChange={v => setBirth("birth_day", v)}>
                     <SelectTrigger data-testid="auth-birth-day-select" className="bg-white/5 border-white/10"><SelectValue placeholder={t("day", lang)} /></SelectTrigger>
@@ -183,21 +191,21 @@ export default function Auth() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-slate-400">{t("gender", lang)}</Label>
-                  <Select value={f.gender} onValueChange={v => setF({ ...f, gender: v, genders: [v] })}>
-                    <SelectTrigger data-testid="auth-gender-select" className="bg-white/5 border-white/10 mt-1"><SelectValue /></SelectTrigger>
+                  <Label className="text-xs text-slate-400">{t("gender", lang)} <span className="text-rose-400">*</span></Label>
+                  <Select value={f.gender || undefined} onValueChange={v => setF({ ...f, gender: v, genders: [v] })}>
+                    <SelectTrigger data-testid="auth-gender-select" className="bg-white/5 border-white/10 mt-1"><SelectValue placeholder={t("gender", lang)} /></SelectTrigger>
                     <SelectContent className="bg-[#161320] border-white/10 max-h-72">{GENDERS.map(g => <SelectItem key={g} value={g}>{t(g, lang)}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-400">{t("interested_in", lang)}</Label>
-                  <Select value={f.interested_in} onValueChange={v => setF({ ...f, interested_in: v })}>
-                    <SelectTrigger data-testid="auth-interest-select" className="bg-white/5 border-white/10 mt-1"><SelectValue /></SelectTrigger>
+                  <Label className="text-xs text-slate-400">{t("interested_in", lang)} <span className="text-rose-400">*</span></Label>
+                  <Select value={f.interested_in || undefined} onValueChange={v => setF({ ...f, interested_in: v })}>
+                    <SelectTrigger data-testid="auth-interest-select" className="bg-white/5 border-white/10 mt-1"><SelectValue placeholder={t("interested_in", lang)} /></SelectTrigger>
                     <SelectContent className="bg-[#161320] border-white/10">{GENDERS.map(g => <SelectItem key={g} value={g}>{t(g, lang)}</SelectItem>)}<SelectItem value="all">{t("all", lang)}</SelectItem></SelectContent>
                   </Select>
                 </div>
                 <div className="col-span-2">
-                  <Label className="text-xs text-slate-400">{t("orientation", lang)} ({t("select_multiple", lang)})</Label>
+                  <Label className="text-xs text-slate-400">{t("orientation", lang)} ({t("select_multiple", lang)}) <span className="text-rose-400">*</span></Label>
                   <div className="mt-1">
                     <MultiSelect
                       testid="auth-orientation-select"
@@ -211,9 +219,9 @@ export default function Auth() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs text-slate-400">{t("country", lang)}</Label>
+                <div><Label className="text-xs text-slate-400">{t("country", lang)} <span className="text-rose-400">*</span></Label>
                   <CountrySelect testid="auth-country-select" value={f.country} onChange={v => setF({ ...f, country: v, city: "" })} lang={lang} /></div>
-                <div><Label className="text-xs text-slate-400">{t("city", lang)}</Label>
+                <div><Label className="text-xs text-slate-400">{t("city", lang)} <span className="text-rose-400">*</span></Label>
                   <CitySelect testid="auth-city-select" required value={f.city} country={f.country} onChange={v => setF({ ...f, city: v })} lang={lang} /></div>
               </div>
               <button
