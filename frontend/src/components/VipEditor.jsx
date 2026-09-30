@@ -121,7 +121,7 @@ export default function VipEditor() {
   const addPhoto = async (e, isPrivate = false) => {
     const files = Array.from(e.target.files || []); if (!files.length) return;
     const list = isPrivate ? privatePhotos : photos;
-    const limit = isPrivate ? 14 : 8;
+    const limit = isPrivate ? 12 : 8;
     const room = limit - list.length;
     const ref = isPrivate ? privateRef : photoRef;
     if (room <= 0) { toast.error(t("vip_max_photos", lang)); if (ref.current) ref.current.value = ""; return; }
@@ -310,7 +310,7 @@ export default function VipEditor() {
               <button data-testid="vip-private-photo-del" onClick={() => delPhoto(p, true)} className="absolute top-0 right-0 bg-black/70 text-rose-300 p-0.5"><X size={12} /></button>
             </div>
           ))}
-          {privatePhotos.length < 14 && (
+          {privatePhotos.length < 12 && (
             <>
               <input ref={privateRef} data-testid="vip-private-photo-input" type="file" accept="image/*" multiple onChange={(e) => addPhoto(e, true)} className="hidden" id="vip-private-photo" />
               <label htmlFor="vip-private-photo" className="w-20 h-20 rounded-lg border-2 border-dashed border-rose-400/50 flex items-center justify-center text-rose-300 cursor-pointer hover:bg-white/5"><Plus size={20} /></label>
