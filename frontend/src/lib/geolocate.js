@@ -55,10 +55,11 @@ export async function geocodeCity(query) {
   }
 }
 
-// Format a distance (in km) into a short, localized "X km / X m away" string.
+// Format a distance (in km) into a short, localized "~X km / X m away" string.
+// The leading "~" signals the value is approximate (derived from city/country when GPS is absent).
 export function formatDistance(km, t, lang) {
   if (km == null || isNaN(km)) return null;
-  if (km < 1) return `${Math.max(1, Math.round(km * 1000))} ${t("m_away", lang)}`;
-  if (km < 10) return `${km.toFixed(1)} ${t("km_away", lang)}`;
-  return `${Math.round(km)} ${t("km_away", lang)}`;
+  if (km < 1) return `~${Math.max(1, Math.round(km * 1000))} ${t("m_away", lang)}`;
+  if (km < 10) return `~${km.toFixed(1)} ${t("km_away", lang)}`;
+  return `~${Math.round(km)} ${t("km_away", lang)}`;
 }

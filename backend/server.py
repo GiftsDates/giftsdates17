@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 from date_ideas_catalog import build_catalog, CAT_IMG
+from geo_coords import approx_coords
 import os, uuid, logging, bcrypt, jwt, stripe, requests, re, secrets, httpx
 
 ROOT_DIR = Path(__file__).parent
@@ -1473,10 +1474,12 @@ def haversine_km(lat1, lng1, lat2, lng2):
         return None
 
 def visible_distance(vlat, vlng, target: dict):
-    """Distance in km from a viewer to a target, honoring the target's hide_distance privacy flag."""
+    """Distance in km from a viewer to a target, honoring the target's hide_distance privacy flag.
+    Falls back to the target's approximate coords (city/country) so every user shows a rough distance."""
     if target.get("hide_distance"):
         return None
-    return haversine_km(vlat, vlng, target.get("lat"), target.get("lng"))
+    tlat, tlng = approx_coords(target)
+    return haversine_km(vlat, vlng, tlat, tlng)
 
 @api.get("/profiles")
 async def list_profiles(
@@ -1584,8 +1587,10 @@ async def list_profiles(
             if v.get("post_mode") == "separate" and not v.get("show_on_main", True):
                 p["is_vip"] = False
     # Distance from the viewer (or a Travel-mode origin) to each profile (km). Exact coords are never exposed.
-    vlat = origin_lat if origin_lat is not None else user.get("lat")
-    vlng = origin_lng if origin_lng is not None else user.get("lng")
+    if origin_lat is not None and origin_lng is not None:
+        vlat, vlng = origin_lat, origin_lng
+    else:
+        vlat, vlng = approx_coords(user)
     for p in results:
         d = visible_distance(vlat, vlng, p)
         if d is not None:
@@ -1666,7 +1671,8 @@ async def profile_detail(pid: str, user=Depends(get_current_user)):
         g = await db.users.find_one({"id": a["_id"]}, {"_id": 0, "id": 1, "name": 1, "photos": 1})
         if g: top.append({"id": g["id"], "name": g["name"], "photo": (g.get("photos") or [None])[0], "total": a["total"], "count": a["count"]})
     p["top_givers"] = top
-    d = visible_distance(user.get("lat"), user.get("lng"), p)
+    _vlat, _vlng = approx_coords(user)
+    d = visible_distance(_vlat, _vlng, p)
     if d is not None:
         p["distance_km"] = d
     # Approximate location for a map preview: rounded to ~1 decimal (~11 km grid) to protect privacy
@@ -1771,7 +1777,8 @@ async def my_matches(user=Depends(get_current_user)):
         other_id = [u for u in m["users"] if u != user["id"]][0]
         other = await db.users.find_one({"id": other_id}, {"_id": 0, "password": 0, "email": 0})
         if other:
-            d = visible_distance(user.get("lat"), user.get("lng"), other)
+            _vlat, _vlng = approx_coords(user)
+            d = visible_distance(_vlat, _vlng, other)
             if d is not None:
                 other["distance_km"] = d
             other.pop("lat", None)
