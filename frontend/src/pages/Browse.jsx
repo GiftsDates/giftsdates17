@@ -13,7 +13,7 @@ import VideoCallModal from "../components/VideoCallModal";
 import DateBookingModal from "../components/DateBookingModal";
 import InviteDateModal from "../components/InviteDateModal";
 import FeedBar from "../components/FeedBar";
-import { Search, SlidersHorizontal, ChevronDown, Crown, Lock, Navigation } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronDown, Crown, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { INTENTS, KIDS, HABITS, RELIGIONS, INCOMES, BUST, SIZES, GENDERS, ORIENTATIONS, optLabel } from "../components/ProfileDetailsForm";
 import { VIP_CATEGORIES, catTitle } from "../lib/vipCatalog";
@@ -165,16 +165,6 @@ export default function Browse() {
               </SelectContent>
             </Select>
           </div>
-          <button
-            type="button"
-            data-testid="profile-sort-nearby-toggle"
-            disabled={!hasCoords}
-            title={!hasCoords ? t("location_needed_for_distance", lang) : undefined}
-            onClick={() => setFilters(f => ({ ...f, sort: f.sort === "nearby" ? "" : "nearby" }))}
-            className={`h-[38px] mt-auto inline-flex items-center gap-1.5 px-3 rounded-lg text-xs border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${filters.sort === "nearby" ? "bg-sky-500/20 border-sky-500/50 text-sky-200" : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"}`}
-          >
-            <Navigation size={13} /> {t("sort_nearby", lang)}
-          </button>
           <button
             type="button"
             data-testid="profile-online-nearby-toggle"
