@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "../components/ui/button";
 import { api, fileUrl } from "../lib/api";
 import { useApp } from "../context/AppContext";
-import { LANGUAGES, t } from "../lib/i18n";
+import { LANGUAGES, SPOKEN_LANGUAGES, t } from "../lib/i18n";
 import { formatDistance } from "../lib/geolocate";
 import { optLabel } from "../components/ProfileDetailsForm";
 import GiftModal from "../components/GiftModal";
@@ -65,7 +65,7 @@ export default function ProfileView() {
   const isSelf = user?.id === p.id;
   const fb = genderFallback(p.gender);
   const photos = p.photos?.length ? p.photos.map(fileUrl) : [fb];
-  const langNames = (p.languages_spoken || []).map(c => LANGUAGES.find(l => l.code === c)?.name || c).join(", ");
+  const langNames = (p.languages_spoken || []).map(c => SPOKEN_LANGUAGES.find(l => l.code === c)?.name || LANGUAGES.find(l => l.code === c)?.name || c).join(", ");
 
   return (
     <div className="aurora-bg min-h-[calc(100vh-4rem)]" data-testid="profile-view-page">

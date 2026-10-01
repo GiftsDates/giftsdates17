@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "./ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import MultiSelect from "./MultiSelect";
-import { LANGUAGES, t } from "../lib/i18n";
+import { SPOKEN_LANGUAGES, t } from "../lib/i18n";
 import { HOBBY_SELECT_GROUPS, HOBBY_MAX } from "../lib/hobbies";
 import { toast } from "sonner";
 
@@ -168,7 +168,7 @@ export default function ProfileDetailsForm({ f, setF, lang, gender }) {
               accent="rose"
               value={f.languages_spoken || []}
               onChange={(codes) => set("languages_spoken")(codes)}
-              options={LANGUAGES.map(l => ({ value: l.code, label: `${l.flag} ${l.name}` }))}
+              options={SPOKEN_LANGUAGES.map(l => ({ value: l.code, label: `${l.flag} ${l.name}` }))}
               placeholder={t("languages_spoken", lang)}
               searchPlaceholder={t("search", lang)}
               emptyText={t("no_results", lang)}
