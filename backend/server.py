@@ -1522,9 +1522,15 @@ async def list_profiles(
         if glist:
             conds.append({"$or": [{"gender": {"$in": glist}}, {"genders": {"$in": glist}}]})
     if q: conds.append({"$or": [{"name": {"$regex": q, "$options": "i"}}, {"bio": {"$regex": q, "$options": "i"}}]})
-    for field, val in (("relationship_intent", intent), ("kids", kids), ("smoking", smoking), ("religion", religion), ("orientation", orientation),
+    for field, val in (("kids", kids), ("smoking", smoking), ("religion", religion),
                        ("drinking", drinking), ("income", income), ("bust_size", bust_size), ("penis_size", penis_size)):
         if val and val != "all": conds.append({field: val})
+    # Orientation & relationship-intent are multi-select profile fields (stored as arrays),
+    # with a legacy single value kept for backward compatibility — match either.
+    if intent and intent != "all":
+        conds.append({"$or": [{"relationship_intent": intent}, {"relationship_intent": {"$in": [intent]}}]})
+    if orientation and orientation != "all":
+        conds.append({"$or": [{"orientation": orientation}, {"orientations": orientation}]})
     if language and language != "all": conds.append({"languages_spoken": language})
     if zodiac and zodiac != "all": conds.append({"zodiac": zodiac})
     if available_date: conds.append({"availability": available_date})
