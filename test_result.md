@@ -202,6 +202,21 @@ backend:
         comment: "Investigated VIP date booking data structure in GET /api/dates response. CONFIRMED: VIP bookings (POST /api/vip/book) include 'vip': true (boolean) in the response, while regular bookings (POST /api/dates/book) COMPLETELY OMIT the vip field. Tested with 2 new users, created both VIP and regular bookings, verified data structure in both outgoing and incoming arrays. Frontend filter !b.vip will correctly separate bookings: VIP bookings (vip=true) are EXCLUDED, regular bookings (vip=undefined) are INCLUDED. Code analysis confirmed: Line 2716 sets vip:True for VIP bookings, lines 2038-2043 omit vip field for regular bookings. Full investigation report saved to /app/VIP_BOOKING_INVESTIGATION_REPORT.md. Test users: 47f1660b-2d31-49ca-8041-225cc7434d94 (Charlie Booker), cdb2b056-8b84-4a96-97ad-2bc23269d47d (Diana Recipient). Test bookings: VIP=42dfd162-ecc4-41be-9dbd-bb515e61e532, Regular=d43cf3f9-90eb-4d53-8c98-7d4d5f59cea4."
 
 frontend:
+  - task: "Hide Video Call option when video_calls_enabled is off"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ProfileView.jsx, /app/frontend/src/components/ProfileCard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "BUG FIX: When a user turns OFF 'Allow video calls' (video_calls_enabled=false), the Video Call button must disappear from their profile page (and Browse card) for other viewers. Added conditional render `p.video_calls_enabled !== false` around the video button in ProfileView.jsx (data-testid=profile-view-video-button) and ProfileCard.jsx (data-testid=profile-card-videocall-button-{id}). Backend GET /api/profiles/{id} and GET /api/profiles return the field via exclusion projection. NEEDS VERIFICATION: Create User A, set video_calls_enabled=false (PATCH /api/auth/me {video_calls_enabled:false}); then as User B view A's profile -> video button should be absent; set it back true -> button reappears. The toggle itself lives in settings (Allow video calls)."
+      - working: true
+        agent: "testing"
+        comment: "BUG FIX VERIFIED SUCCESSFULLY. Created 3 test users: User A (AliceNoVideo, video_calls_enabled=false), User B (BobViewer, viewer), User C (CaraVideo, video_calls_enabled=true/default). Logged in as User B and tested: TEST 1 PASSED - User A's profile page correctly HIDES the Video Call button (data-testid=profile-view-video-button absent). TEST 2 PASSED - User C's profile page correctly SHOWS the Video Call button (data-testid=profile-view-video-button present). TEST 3 PASSED - Browse page: User A's card correctly HIDES video button (data-testid=profile-card-videocall-button-{id} absent), User C's card correctly SHOWS video button (present). Backend API confirmed: User A returns video_calls_enabled:false, User C omits the field (default enabled). Frontend conditional logic {p.video_calls_enabled !== false} works perfectly. Screenshots captured for all test cases. All action buttons (Like, Gift, Invite on a Date) remain visible as expected."
+
   - task: "Frontend Testing"
     implemented: true
     working: "NA"
@@ -217,14 +232,13 @@ frontend:
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 3
+  test_sequence: 4
   run_ui: false
-  last_tested: "2026-09-30T02:15:00.000000"
-  backend_url: "https://gift-saver-2.preview.emergentagent.com/api"
+  last_tested: "2026-10-01T01:28:00.000000"
+  backend_url: "https://date-manager-31.preview.emergentagent.com/api"
 
 test_plan:
-  current_focus:
-    - "VIP booking data structure investigation completed and verified"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -239,4 +253,7 @@ agent_communication:
   - agent: "testing"
     timestamp: "2026-09-30T02:15:00"
     message: "VIP booking data structure investigation completed. KEY FINDINGS: 1) VIP bookings (POST /api/vip/book) include 'vip': true (boolean) in GET /api/dates response. 2) Regular bookings (POST /api/dates/book) COMPLETELY OMIT the vip field (not false, just missing). 3) Frontend filter !b.vip correctly separates them: VIP bookings excluded (vip=true evaluates to false), regular bookings included (vip=undefined evaluates to true). 4) Code verified at lines 2716 (VIP sets vip:True) and 2038-2043 (regular omits vip field). 5) Tested with 2 new users, created both booking types, verified in both outgoing/incoming arrays. Full report: /app/VIP_BOOKING_INVESTIGATION_REPORT.md. No changes needed - implementation is correct."
+  - agent: "testing"
+    timestamp: "2026-10-01T01:28:00"
+    message: "Video Call button visibility bug fix VERIFIED and WORKING. Tested with 3 users (A=video OFF, B=viewer, C=video ON). All tests passed: 1) User A's profile correctly hides Video Call button when video_calls_enabled=false, 2) User C's profile correctly shows Video Call button when video_calls_enabled=true/default, 3) Browse cards correctly show/hide video buttons based on user settings. Frontend conditional logic {p.video_calls_enabled !== false} works perfectly with backend API responses. Bug fix is complete and functional."
 

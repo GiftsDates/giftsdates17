@@ -94,7 +94,9 @@ export default function ProfileCard({ p, onLike, onGift, onVideo, onDate, onMess
       <div className="p-3 flex items-center gap-1.5 bg-[#161320]/80 backdrop-blur">
         <Button data-testid={`profile-card-like-button-${p.id}`} onClick={() => onLike(p)} size="icon" className="rose-btn text-white border-0 rounded-full h-10 w-10 flex-shrink-0" title={t("like", lang)}><Heart size={16} className="fill-white" /></Button>
         <Button data-testid={`profile-card-gift-button-${p.id}`} onClick={() => onGift(p)} size="icon" variant="outline" className="rounded-full h-10 w-10 flex-shrink-0 bg-amber-500/10 border-amber-500/40 hover:bg-amber-500/20 text-amber-300" title={t("gift", lang)}><Gift size={16} /></Button>
-        <Button data-testid={`profile-card-videocall-button-${p.id}`} onClick={() => onVideo(p)} size="icon" variant="outline" className="rounded-full h-10 w-10 flex-shrink-0 bg-violet-500/10 border-violet-500/40 hover:bg-violet-500/20 text-violet-300" title={t("video_call", lang)}><Video size={16} /></Button>
+        {p.video_calls_enabled !== false && (
+          <Button data-testid={`profile-card-videocall-button-${p.id}`} onClick={() => onVideo(p)} size="icon" variant="outline" className="rounded-full h-10 w-10 flex-shrink-0 bg-violet-500/10 border-violet-500/40 hover:bg-violet-500/20 text-violet-300" title={t("video_call", lang)}><Video size={16} /></Button>
+        )}
         <Button data-testid={`profile-card-date-button-${p.id}`} onClick={() => onDate(p)} size="icon" variant="outline" className="rounded-full h-10 w-10 flex-shrink-0 bg-white/5 border-white/15 hover:bg-white/10" title={t("book_date", lang)}><CalendarHeart size={16} /></Button>
       </div>
     </div>
