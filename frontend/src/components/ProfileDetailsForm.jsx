@@ -14,7 +14,7 @@ export const INCOMES = ["custom", "prefer_not"];
 export const KIDS = ["none", "have", "want", "no_want"];
 export const HABITS = ["never", "sometimes", "often"];
 export const RELIGIONS = ["christian", "muslim", "jewish", "buddhist", "hindu", "spiritual", "atheist", "other", "prefer_not"];
-export const BUST = ["A", "B", "C", "D", "E", "F+"];
+export const BUST = ["AA", "A", "B", "C", "D", "DD", "E", "F", "G", "H+", "Natural", "Enhanced"];
 export const SIZES = ["s", "m", "l", "xl"];
 
 export const GENDERS = ["female", "male", "trans_woman", "trans_man", "non_binary", "transgender", "transfeminine", "transmasculine", "cis_woman", "cis_man", "agender", "genderqueer", "genderfluid", "genderless", "gender_nonconforming", "gender_questioning", "bigender", "pangender", "demigender", "demigirl", "demiboy", "two_spirit", "intersex", "androgyne", "androgynous", "neutrois", "gender_variant", "third_gender", "polygender", "omnigender", "transsexual", "questioning", "other_gender", "prefer_not_gender"];
