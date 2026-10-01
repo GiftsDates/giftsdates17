@@ -31,9 +31,9 @@ const NONE_VAL = "__none";
 const CUSTOM_VAL = "__custom";
 
 // A dropdown with all preset options plus a "Custom (type)…" entry that reveals a free-text input.
-function AttrSelect({ label, value, onChange, options, lang, testid, customPh }) {
+function AttrSelect({ label, value, onChange, options, lang, testid, customPh, noCustom }) {
   const isPreset = value && options.includes(value);
-  const isCustom = !!value && !isPreset;
+  const isCustom = !noCustom && !!value && !isPreset;
   const selectVal = isPreset ? value : (isCustom ? CUSTOM_VAL : NONE_VAL);
   return (
     <div>
@@ -50,7 +50,7 @@ function AttrSelect({ label, value, onChange, options, lang, testid, customPh })
         <SelectContent className="bg-[#161320] border-white/10 text-white max-h-72">
           <SelectItem value={NONE_VAL}>{t("not_specified_short", lang)}</SelectItem>
           {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-          <SelectItem value={CUSTOM_VAL}>{t("vip_attr_custom", lang)}</SelectItem>
+          {!noCustom && <SelectItem value={CUSTOM_VAL}>{t("vip_attr_custom", lang)}</SelectItem>}
         </SelectContent>
       </Select>
       {isCustom && (
@@ -301,7 +301,7 @@ export default function VipEditor() {
             <label className="text-xs text-slate-400">{t("vip_dick_size", lang)}</label>
             <Input data-testid="vip-dick" type="number" min="1" max="60" value={(sepDick || "").trim()} onChange={(e) => setSepDick(e.target.value)} placeholder={t("vip_dick_custom_ph", lang)} className="bg-white/5 border-white/10 mt-1" />
           </div>
-          <AttrSelect testid="vip-dick-girth" label={t("vip_dick_girth", lang)} value={sepDickGirth} onChange={setSepDickGirth} options={DICK_GIRTHS} lang={lang} />
+          <AttrSelect testid="vip-dick-girth" label={t("vip_dick_girth", lang)} value={sepDickGirth} onChange={setSepDickGirth} options={DICK_GIRTHS} lang={lang} noCustom />
         </div>
       </div>
 
